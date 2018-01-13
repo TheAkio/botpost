@@ -22,11 +22,17 @@ const request = (method, url, body, headers) => new Promise((resolve, reject) =>
 
 	req.once('abort', () => {
 		error = error || new Error(`WebAgent: Request aborted by client on ${method} ${url}`);
-		error.req = req;
+		Object.defineProperty(error, 'req', {
+			value: req,
+			enumerable: false,
+		});
 		reject(error);
 	}).once('aborted', () => {
 		error = error || new Error(`WebAgent: Request aborted by server on ${method} ${url}`);
-		error.req = req;
+		Object.defineProperty(error, 'req', {
+			value: req,
+			enumerable: false,
+		});
 		reject(error);
 	}).once('error', err => {
 		error = err;
@@ -39,9 +45,48 @@ const request = (method, url, body, headers) => new Promise((resolve, reject) =>
 		resp.on('data', data => {
 			response += data;
 		}).once('end', () => {
-			// If not 200 or so reject with error and response
-			// Otherwise resolve with response, also parse to JSON if application-type is json
-			// Return response headers too!
+			if (response.length > 0) {
+				if (resp.headers['content-type'] === 'application/json') {
+					try {
+						response = JSON.parse(response);
+					} catch (e) {
+						error = new Error(`Could not parse JSON: ${e ? e.message ? e.message : JSON.stringify(e) : e}`);
+						error.cause = e;
+						error.response = response;
+						Object.defineProperty(error, 'req', {
+							value: req,
+							enumerable: false,
+						});
+						Object.defineProperty(error, 'resp', {
+							value: req,
+							enumerable: false,
+						});
+						return reject(error);
+					}
+				}
+			}
+
+			if (resp.statusCode >= 300) {
+				error = new Error(`MAKE THIS TEXT BETTER PLS`);
+				error.status = resp.statusCode;
+				error.response = response;
+				Object.defineProperty(error, 'req', {
+					value: req,
+					enumerable: false,
+				});
+				Object.defineProperty(error, 'resp', {
+					value: req,
+					enumerable: false,
+				});
+				return reject(error);
+			}
+
+			resolve({
+				status: resp.statusCode,
+				req,
+				resp,
+				response,
+			});
 		});
 	});
 
@@ -50,14 +95,18 @@ const request = (method, url, body, headers) => new Promise((resolve, reject) =>
 		req.abort();
 	});
 
-	if (Array.isArray(body)) {
+	if (typeof body === 'string' || typeof body === 'number') {
+		req.end(body);
+	} else if (Array.isArray(body)) {
 		for (let chunk of body) req.write(chunk);
 		req.end();
 	} else {
-		req.end(body);
+		// Assuming object
+		req.end(JSON.stringify(body));
 	}
 });
 
+const get = (url, body, headers) => request('GET', url, body, headers);
 const post = (url, body, headers) => request('POST', url, body, headers);
 
-module.exports = { request, post };
+module.exports = { request, get, post };

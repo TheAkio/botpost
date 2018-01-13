@@ -24,6 +24,11 @@ try {
 			cli.on('guildDelete', (guild) => func(guild.shard.id));
 			cli.on('unavailableGuildCreate', (guild) => func(guild.shard.id));
 		},
+		getClientID: (cli) => cli.user.id,
+		getShardCount: (cli) => {
+			if (typeof cli.options.maxShards === 'string') throw new Error('Max shards are not known yet');
+			return cli.options.maxShards;
+		},
 	};
 } catch (e) {
 	// Ignore
@@ -44,6 +49,8 @@ try {
 			cli.on('guildCreate', () => func(cli.options.shardId || 0));
 			cli.on('guildDelete', () => func(cli.options.shardId || 0));
 		},
+		getClientID: (cli) => cli.user.id,
+		getShardCount: (cli) => cli.options.shardCount || 1,
 	};
 	clients.discordjs.class = c;
 } catch (e) {
@@ -69,6 +76,8 @@ try {
 			cli.Dispatcher.on('GUILD_CREATE', () => func(cli.options.shardId || 0));
 			cli.Dispatcher.on('GUILD_DELETE', () => func(cli.options.shardId || 0));
 		},
+		getClientID: (cli) => cli.User.id,
+		getShardCount: (cli) => cli.options.shardCount || 1,
 	};
 } catch (e) {
 	// Ignore
@@ -89,6 +98,8 @@ try {
 			cli.on('guildCreate', () => func(cli._shard ? cli._shard[0] : 0));
 			cli.on('guildDelete', () => func(cli._shard ? cli._shard[0] : 0));
 		},
+		getClientID: (cli) => cli.id,
+		getShardCount: (cli) => cli._shard ? cli._shard[1] : 1,
 	};
 } catch (e) {
 	// Ignore
@@ -116,7 +127,7 @@ class ClientWrapper extends EventEmitter {
 	registerFunction(func) {
 		this._clientInfo.registerEvents(this._cli, (shardID) => {
 			try {
-				func(shardID, this.getShardGuildCount(shardID));
+				func(this.getClientID(), shardID, this.getShardCount(), this.getShardGuildCount(shardID));
 			} catch (e) {
 				// Ignore
 			}
@@ -125,6 +136,14 @@ class ClientWrapper extends EventEmitter {
 
 	getShardGuildCount(shardID) {
 		return this._clientInfo.getShardGuildCount(this._cli, shardID);
+	}
+
+	getClientID() {
+		return this._clientInfo.getClientID(this._cli);
+	}
+
+	getShardCount() {
+		return this._clientInfo.getShardCount(this._cli);
 	}
 }
 

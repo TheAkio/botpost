@@ -10,7 +10,7 @@ class Service {
 	}
 
 	post() {
-		throw new Error(`Service: post function not overridden in ${this.name}`);
+		return new Promise((resolve, reject) => reject(new Error(`Service: post function not overridden in ${this.name}`)));
 	}
 }
 

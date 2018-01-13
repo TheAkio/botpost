@@ -2,11 +2,11 @@
 
 const BotPost = require('./BotPost');
 
-function Export(options) {
+function Exports(options) {
 	return new BotPost(options);
 }
 
-Export.BotPost = BotPost;
-Export.Service = require('./service/Service');
+Exports.BotPost = BotPost;
+Exports.Service = require('./service/Service');
 
-module.exports = Export;
+module.exports = Exports;
