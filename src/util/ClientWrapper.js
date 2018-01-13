@@ -9,8 +9,7 @@ try {
 	const c = require('eris').Client;
 
 	// Clustering: Eris supports clustering, shardID is given with the event
-	// Guild Unavailability: Eris has two collections for guilds, although it has an event that is only emitted
-	// 						 when an unavailable guild is created, which we can use
+	// Guild Unavailability: Eris has two collections for guilds, although it has an event that is only emitted when an unavailable guild is created, which we can use
 	clients.eris = {
 		name: 'Eris',
 		class: c,
@@ -56,8 +55,7 @@ try {
 	const c = require('discordie');
 
 	// Clustering: Discordie does not support clustering, shardID is always the one in the client
-	// Guild Unavailability: Discordie has two collections for guilds, there is no event for unavailable guild create
-	// 						 we are just using GUILD_CREATE and GUILD_DELETE for this library
+	// Guild Unavailability: Discordie has two collections for guilds, there is no event for unavailable guild create we are just using GUILD_CREATE and GUILD_DELETE for this library
 	clients.discordie = {
 		name: 'Discordie',
 		class: c,
