@@ -195,6 +195,6 @@
 	  "template-curly-spacing": "error",
 	  "yield-star-spacing": "error",
 	  "no-case-declarations": "off",
-	  "no-console": "off"
+		"no-console": "off"
 	}
   }

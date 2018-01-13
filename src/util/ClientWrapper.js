@@ -8,6 +8,9 @@ try {
 	// https://github.com/abalabahaha/eris
 	const c = require('eris').Client;
 
+	// Clustering: Eris supports clustering, shardID is given with the event
+	// Guild Unavailability: Eris has two collections for guilds, although it has an event that is only emitted
+	// 						 when an unavailable guild is created, which we can use
 	clients.eris = {
 		name: 'Eris',
 		class: c,
@@ -31,9 +34,17 @@ try {
 	// https://github.com/hydrabolt/discord.js/
 	const c = require('discord.js').Client;
 
+	// Clustering: Discord.js does not support clustering, shardID is always the one in the client
+	// Guild Unavailability: Discord.js stores all guilds in the same collection, the state doesn't matter
 	clients.discordjs = {
 		name: 'Discord.JS',
 		class: c,
+		getShardGuildCount: (cli) => cli.guilds.size,
+		registerEvents: (cli, func) => {
+			cli.on('ready', () => func(cli.options.shardId || 0));
+			cli.on('guildCreate', () => func(cli.options.shardId || 0));
+			cli.on('guildDelete', () => func(cli.options.shardId || 0));
+		},
 	};
 	clients.discordjs.class = c;
 } catch (e) {
@@ -44,9 +55,22 @@ try {
 	// https://github.com/qeled/discordie
 	const c = require('discordie');
 
+	// Clustering: Discordie does not support clustering, shardID is always the one in the client
+	// Guild Unavailability: Discordie has two collections for guilds, there is no event for unavailable guild create
+	// 						 we are just using GUILD_CREATE and GUILD_DELETE for this library
 	clients.discordie = {
 		name: 'Discordie',
 		class: c,
+		getShardGuildCount: (cli) => {
+			const availableCount = cli.Guilds.size;
+			const unavailableCount = cli.UnavailableGuilds.length;
+			return availableCount + unavailableCount;
+		},
+		registerEvents: (cli, func) => {
+			cli.Dispatcher.on('GATEWAY_READY', () => func(cli.options.shardId || 0));
+			cli.Dispatcher.on('GUILD_CREATE', () => func(cli.options.shardId || 0));
+			cli.Dispatcher.on('GUILD_DELETE', () => func(cli.options.shardId || 0));
+		},
 	};
 } catch (e) {
 	// Ignore
@@ -56,9 +80,17 @@ try {
 	// https://github.com/izy521/discord.io
 	const c = require('discord.io').Client;
 
+	// Clustering: Discord.io does not support clustering, shardID is always the one in the client
+	// Guild Unavailability: Discord.io stores all guilds in the same collection, the state doesn't matter
 	clients.discordio = {
 		name: 'Discord.IO',
 		class: c,
+		getShardGuildCount: (cli) => Object.keys(cli.servers).length,
+		registerEvents: (cli, func) => {
+			cli.on('ready', () => func(cli._shard ? cli._shard[0] : 0));
+			cli.on('guildCreate', () => func(cli._shard ? cli._shard[0] : 0));
+			cli.on('guildDelete', () => func(cli._shard ? cli._shard[0] : 0));
+		},
 	};
 } catch (e) {
 	// Ignore

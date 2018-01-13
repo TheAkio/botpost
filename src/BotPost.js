@@ -6,9 +6,11 @@ const ClientWrapper = require('./util/ClientWrapper');
 const Service = require('./service/Service');
 
 class BotPost extends EventEmitter {
-	constructor(options) {
+	constructor(client, options) {
 		super();
 		this._services = [];
+
+		if (client) this.addClient(client);
 
 		if (!options) return;
 	}
