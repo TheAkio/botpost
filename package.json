@@ -1,0 +1,20 @@
+{
+  "name": "botpost",
+  "version": "0.0.1",
+  "description": "SoonTM",
+  "main": "src/index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TheAkio/botpost.git"
+  },
+  "author": "TheAkio",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/TheAkio/botpost/issues"
+  },
+  "homepage": "https://github.com/TheAkio/botpost#readme",
+  "devDependencies": {
+    "eslint": "^4.15.0"
+  }
+}
