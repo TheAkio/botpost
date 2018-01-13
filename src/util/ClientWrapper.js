@@ -69,7 +69,8 @@ class ClientWrapper extends EventEmitter {
 		super();
 		this._cli = cli;
 
-		for (const info in clients) {
+		for (const key in clients) {
+			const info = clients[key];
 			if (!(cli instanceof info.class)) continue;
 			this._clientInfo = info;
 			break;
@@ -84,12 +85,16 @@ class ClientWrapper extends EventEmitter {
 
 	registerFunction(func) {
 		this._clientInfo.registerEvents(this._cli, (shardID) => {
-			func(shardID, this.getShardGuildCount(shardID));
+			try {
+				func(shardID, this.getShardGuildCount(shardID));
+			} catch (e) {
+				// Ignore
+			}
 		});
 	}
 
 	getShardGuildCount(shardID) {
-		return this.clientInfo.getShardGuildCount(shardID);
+		return this._clientInfo.getShardGuildCount(this._cli, shardID);
 	}
 }
 
