@@ -12,20 +12,20 @@ class BotPost extends EventEmitter {
 		super();
 		this._services = [];
 
-		this.uagent = `BotPost/v${require('../package.json').version}`;
-
 		if (client) this.addClient(client);
 
 		if (!options) return;
 
-		if (options.botsDiscordPw) this.addService(new BotsDiscordPw(options.botsDiscordPw));
+		if (options.botsDiscordPw) this.addBotsDiscordPw(options.botsDiscordPw);
 	}
 
 	addClient(client) {
 		const wrapper = new ClientWrapper(client);
 		wrapper.registerFunction((...args) => {
 			this.emit('debug', `Received guild count update on ${wrapper.getClientName()} client (clientID: ${args[0]}, shard: ${args[1]}/${args[2]}, guildCount: ${args[3]})`);
-			for (const service of this._services) service.post(...args);
+			for (const service of this._services) service.post(...args).catch(() => {
+				// TODO error handling
+			});
 		});
 
 		this.emit('debug', `Added client: ${wrapper.getClientName()}`);
@@ -36,6 +36,10 @@ class BotPost extends EventEmitter {
 		this._services.push(service);
 
 		this.emit('debug', `Added service: ${service.getName()}`);
+	}
+
+	addBotsDiscordPw(token) {
+		this.addService(new BotsDiscordPw(token));
 	}
 }
 

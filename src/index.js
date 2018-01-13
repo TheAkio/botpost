@@ -8,5 +8,6 @@ function Exports(options) {
 
 Exports.BotPost = BotPost;
 Exports.Service = require('./service/Service');
+Exports.WebAgent = require('./util/WebAgent');
 
 module.exports = Exports;
